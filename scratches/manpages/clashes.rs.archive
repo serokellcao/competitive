@@ -1,0 +1,140 @@
+use std::io;
+
+macro_rules! parse_input {
+    ($x:expr, $t:ident) => ($x.trim().parse::<$t>().unwrap())
+}
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+fn main() {
+    for i in 0..16 as usize {
+        let mut input_line = String::new();
+        io::stdin().read_line(&mut input_line).unwrap();
+        let t = input_line.trim_matches('\n').to_string();
+        if t.len() < 1 {
+            print!(" ");
+            continue;
+        }
+        if t.chars().nth(0).unwrap() == '.' {
+            println!("{}", '.');
+            return;
+        }
+        print!("{}", t.chars().nth(0).unwrap());
+    }
+
+    // Write an answer using println!("message...");
+    // To debug: eprintln!("Debug message...");
+
+    println!("answer");
+}
+
+////
+
+use std::io;
+
+macro_rules! parse_input {
+    ($x:expr, $t:ident) => ($x.trim().parse::<$t>().unwrap())
+}
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+fn main() {
+    let mut input_line = String::new();
+    io::stdin().read_line(&mut input_line).unwrap();
+    let n = parse_input!(input_line, i32);
+    for i in 0..n as usize {
+        let mut input_line = String::new();
+        io::stdin().read_line(&mut input_line).unwrap();
+        let row = input_line.trim_matches('\n').to_string();
+        println!("{}", row.replace("0", "-"));
+    }
+}
+
+////
+
+use std::io;
+
+macro_rules! parse_input {
+    ($x:expr, $t:ident) => ($x.trim().parse::<$t>().unwrap())
+}
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+fn main() {
+    let mut input_line = String::new();
+    io::stdin().read_line(&mut input_line).unwrap();
+    let n = input_line.trim_matches('\n').to_string();
+
+    // Write an answer using println!("message...");
+    // To debug: eprintln!("Debug message...");
+
+    let candidate1h = format!("{}", n);
+    let candidate1m = format!("{}", n);
+
+    let mut nonee = true;
+
+    if candidate1h.to_string().parse::<u32>().unwrap() < 25 {
+        if candidate1m.to_string().parse::<u32>().unwrap() < 61 {
+            print!("{}:{}", candidate1h, candidate1m);
+            nonee = false;
+        }
+        let yy = candidate1m.to_string().chars().rev().collect::<String>().parse::<u32>().unwrap();
+        if yy != candidate1m.to_string().parse::<u32>().unwrap() {
+            if yy < 61 {
+                if nonee {
+                    print!("{}:{}", candidate1h, yy);
+                    nonee = false;
+                } else {
+                    print!(" {}:{}", candidate1h, yy);
+                    nonee = false;
+                }
+            }
+        }
+    }
+
+    if nonee {
+        println!("NONE");
+    } else {
+        println!("");
+    }
+
+}
+
+
+////
+
+use std::io::*;
+
+pub fn pint() -> i32 {
+    let mut l = String::new();
+    stdin().read_line(&mut l).unwrap();
+    l.trim().parse().unwrap()
+}
+
+fn main() {
+    // To hex
+    let mut r = format!("{:x}", pint());
+    let mut g = format!("{:x}", pint());
+    let mut b = format!("{:x}", pint());
+    if r.len() == 1 {
+        r = format!("0{}", r);
+    }
+    if g.len() == 1 {
+        g = format!("0{}", g);
+    }
+    if b.len() == 1 {
+        b = format!("0{}", b);
+    }
+    let rgb = format!("{}{}{}", r, g, b);
+    println!("#{}", rgb.to_ascii_uppercase());
+}
+
+////
+
+

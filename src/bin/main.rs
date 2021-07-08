@@ -1,3 +1,5 @@
+use competitive::junk::demo;
+
 fn main() {
-    println!("Hello, world!");
+    demo()
 }

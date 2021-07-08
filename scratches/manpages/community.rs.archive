@@ -1,0 +1,169 @@
+use std::io;
+use std::convert::TryFrom;
+use std::fmt::Binary;
+use std::io::*;
+use std::{
+    convert::TryInto,
+    fmt::Debug,
+    time::{SystemTime, UNIX_EPOCH},
+};
+
+macro_rules! parse_input {
+    ($x:expr, $t:ident) => ($x.trim().parse::<$t>().unwrap())
+}
+
+pub fn a_to_bitmap<T: TryFrom<isize>>(x: &str) -> T {
+    match isize::from_str_radix(x, 2).unwrap().try_into() {
+        Ok(y) => y,
+        Err(_) => panic!("Failed to convert"),
+    }
+}
+
+pub fn i_to_bit(x: u8) -> u128 {
+    u128::pow(2, x as u32)
+}
+
+pub fn bitmap_to_a<T: Binary>(x: T) -> String {
+    format!("{:b}", x)
+}
+
+pub fn directions() -> Vec<(i32, i32)> {
+    vec![(-1,-1), (0,-1), (1,-1),
+         (-1,0),          (1,0),
+         (-1,1),  (0, 1), (1,1)]
+}
+
+pub fn neighbours((x, y): (i32, i32), (mx, my): (i32, i32)) -> Vec<(i32, i32)> {
+    let mut ns = Vec::new();
+    directions().iter().for_each(|(dx, dy)| if x + dx >= 0 && y + dy >= 0 && x + dx < mx && y + dy < my {
+        ns.push((x + dx, y + dy));
+    });
+    ns
+}
+
+pub fn alive_from(world: &Vec<Vec<u8>>, xs: Vec<(i32, i32)>) -> u8 {
+    let mut res = 0;
+    xs.iter().for_each(|(x, y)| { 
+        eprintln!("({},{}) => {}", x, y, world[*y as usize][*x as usize]);
+        if world[*y as usize][*x as usize] == 1 {
+        //eprintln!("{},{} is {}", x, y, world[*y as usize][*x as usize]);
+            res += 1;
+        }
+    });
+    res
+}
+
+pub fn alive_around(world: &Vec<Vec<u8>>, (x, y): (i32, i32)) -> u8 {
+    alive_from(world, neighbours((x, y), (world[0].len() as i32, world.len() as i32)))
+}
+
+pub fn step_cell(cell: u8, alive: u8, alive_bitmap: u16, revive_bitmap: u16) -> u8 {
+    match cell {
+        1 => {
+            eprintln!("It was alive with {} alive neigbours", alive);
+            if (i_to_bit(alive) & alive_bitmap as u128) == i_to_bit(alive) {
+                eprintln!("Staying alive {:b} & {:b}", i_to_bit(alive), alive_bitmap);
+                1
+            } else {
+                eprintln!("Not staying alive {:b} & {:b}", i_to_bit(alive), alive_bitmap);
+                0
+            }}
+        0 => {
+            eprintln!("It was dead with {} alive neigbours", alive);
+            if (i_to_bit(alive) & revive_bitmap as u128) == i_to_bit(alive) {
+                eprintln!("Reviving {:b} & {:b}", i_to_bit(alive), revive_bitmap);
+                1
+            } else {
+                eprintln!("Not reviving {:b} & {:b}", i_to_bit(alive), revive_bitmap);
+                0
+            }}
+        _ => panic!("Advanced rules too soon")
+    }
+}
+
+pub fn step(world: Vec<Vec<u8>>, alive_bitmap: u16, revive_bitmap: u16) -> Vec<Vec<u8>> {
+    let mut world1 = Vec::new();
+    for (y, row) in world.iter().enumerate() {
+        let mut row1 = Vec::new();
+        for (x, cell) in row.iter().enumerate() {
+           eprintln!("Updating coordinate ({},{})", x, y);
+           row1.push(step_cell(*cell, alive_around(&world, (x as i32, y as i32)), alive_bitmap, revive_bitmap));
+           eprintln!(" * * * ");
+           eprintln!("The row is now\n{:?}", row1.clone());
+        }
+        world1.push(row1);
+    }
+    world1
+}
+
+pub fn world_to_ascii(world: Vec<Vec<u8>>) -> String {
+    let mut res = String::new();
+    for row in world.iter() {
+        for cell in row.iter() {
+            match cell { 
+                0 => res.push('.'),
+                1 => res.push('O'),
+                _ => panic!("Advanced rules too soon"),
+            }
+        }
+        res.push('\n');
+    }
+    res.trim().to_string()
+}
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+fn main() {
+    let mut input_line = String::new();
+    io::stdin().read_line(&mut input_line).unwrap();
+    let inputs = input_line.split(" ").collect::<Vec<_>>();
+    let h = parse_input!(inputs[0], i32);
+    let w = parse_input!(inputs[1], i32);
+    let n = parse_input!(inputs[2], i32);
+    let mut input_line = String::new();
+    io::stdin().read_line(&mut input_line).unwrap();
+    let alive = input_line.trim_matches('\n').to_string();
+    let mut input_line = String::new();
+    io::stdin().read_line(&mut input_line).unwrap();
+    let dead = input_line.trim_matches('\n').to_string();
+    let mut world: Vec<Vec<u8>> = Vec::new();
+    for y in 0..h as usize {
+        let mut input_line = String::new();
+        io::stdin().read_line(&mut input_line).unwrap();
+        let line = input_line.trim_matches('\n').to_string();
+
+        // logic:
+        let mut xs: Vec<u8> = Vec::new();
+        for (x, c) in line.chars().enumerate() {
+            if c == '.' {
+                xs.push(0);
+            } else if c == 'O' {
+                xs.push(1);
+            } else {
+                panic!("Specification lied to us! {:#?} encountered {:#?} at position {:#?}:{:#?}", line, c, y, x);
+            }
+        }
+        // add row:
+        world.push(xs);
+    }
+
+    // Write an answer using println!("message...");
+    // To debug: eprintln!("Debug message...");
+
+    let alive_bitmap: u16 = 
+        a_to_bitmap(&alive.chars().rev().collect::<String>()[..]);
+
+    let revive_bitmap: u16 = 
+        a_to_bitmap(&dead.chars().rev().collect::<String>()[..]);
+
+    let mut world_n = world;
+    eprintln!("Running {} times", n);
+    for i in 0..n {
+        eprintln!(".");
+        world_n = step(world_n.clone(), alive_bitmap, revive_bitmap);
+    }
+    println!("{}", world_to_ascii(world_n));
+}
+
